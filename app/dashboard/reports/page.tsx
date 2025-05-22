@@ -13,9 +13,6 @@ import {
   Line,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -23,7 +20,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts"
-import type { Transaction, User, Category } from "@/lib/types"
+import type { Transaction, User } from "@/lib/types"
 import { IndianCurrencyDisplay } from "@/components/indian-currency-display"
 import { formatIndianCurrency } from "@/lib/utils-indian-currency"
 
@@ -31,10 +28,9 @@ export default function ReportsPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [categories, setCategories] = useState<Category[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [timeRange, setTimeRange] = useState<"month" | "quarter" | "year">("month")
-  const [reportType, setReportType] = useState<"income-vs-expense" | "category" | "trend">("income-vs-expense")
+  const [reportType, setReportType] = useState<"income-vs-expense" | "trend">("income-vs-expense")
 
   useEffect(() => {
     // Check if user is logged in
@@ -46,12 +42,6 @@ export default function ReportsPage() {
 
     const parsedUser = JSON.parse(userData)
     setUser(parsedUser)
-
-    // Load categories
-    const categoriesData = localStorage.getItem("tracksyCategories")
-    if (categoriesData) {
-      setCategories(JSON.parse(categoriesData))
-    }
 
     // Load transactions
     const transactionsData = localStorage.getItem("tracksyTransactions")
@@ -111,32 +101,6 @@ export default function ReportsPage() {
       income: values.income,
       expense: values.expense,
     }))
-  }
-
-  // Prepare data for Category breakdown
-  const prepareCategoryData = () => {
-    const filteredTransactions = getFilteredTransactions()
-    const expensesByCategory: Record<string, number> = {}
-
-    filteredTransactions.forEach((transaction) => {
-      if (transaction.type === "expense") {
-        if (!expensesByCategory[transaction.categoryId]) {
-          expensesByCategory[transaction.categoryId] = 0
-        }
-        expensesByCategory[transaction.categoryId] += transaction.amount
-      }
-    })
-
-    return Object.entries(expensesByCategory)
-      .map(([categoryId, amount]) => {
-        const category = categories.find((c) => c.id === categoryId)
-        return {
-          name: category ? category.name : "Uncategorized",
-          value: amount,
-          color: category ? category.color : "#999999",
-        }
-      })
-      .sort((a, b) => b.value - a.value)
   }
 
   // Prepare data for Trend analysis
@@ -314,9 +278,8 @@ export default function ReportsPage() {
       </div>
 
       <Tabs value={reportType} onValueChange={(value) => setReportType(value as any)} className="mt-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="income-vs-expense">Income vs Expense</TabsTrigger>
-          <TabsTrigger value="category">Category Breakdown</TabsTrigger>
           <TabsTrigger value="trend">Balance Trend</TabsTrigger>
         </TabsList>
 
@@ -338,39 +301,6 @@ export default function ReportsPage() {
                     <Bar dataKey="income" name="Income" fill="#4CAF50" />
                     <Bar dataKey="expense" name="Expense" fill="#F44336" />
                   </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="category">
-          <Card>
-            <CardHeader>
-              <CardTitle>Expense Categories</CardTitle>
-              <CardDescription>Breakdown of your expenses by category</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={prepareCategoryData()}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={150}
-                      fill="#8884d8"
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {prepareCategoryData().map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatIndianCurrency(value as number)} />
-                    <Legend />
-                  </PieChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>

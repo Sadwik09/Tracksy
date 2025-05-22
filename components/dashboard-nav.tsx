@@ -34,12 +34,12 @@ export function DashboardNav() {
     },
     {
       title: "Transactions",
-      href: "/dashboard?tab=transactions",
+      href: "/dashboard/transactions",
       icon: <CreditCard className="mr-2 h-4 w-4" />,
     },
     {
       title: "Budget",
-      href: "/dashboard?tab=budget",
+      href: "/dashboard/budget",
       icon: <Target className="mr-2 h-4 w-4" />,
     },
     {
@@ -57,12 +57,7 @@ export function DashboardNav() {
   return (
     <nav className="grid items-start gap-2">
       {navItems.map((item, index) => {
-        const isActive =
-          pathname === item.href ||
-          (pathname === "/dashboard" &&
-            item.href.includes("?tab=") &&
-            pathname + item.href.substring(item.href.indexOf("?")) === item.href) ||
-          (pathname.startsWith(item.href) && item.href !== "/dashboard")
+        const isActive = pathname === item.href || pathname.startsWith(item.href)
 
         return (
           <Link

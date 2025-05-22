@@ -11,14 +11,6 @@ export interface Transaction {
   amount: number
   description: string
   date: string
-  categoryId: string
   notes?: string
   createdAt: string
-}
-
-export interface Category {
-  id: string
-  name: string
-  type: "income" | "expense"
-  color: string
 }

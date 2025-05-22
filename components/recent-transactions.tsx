@@ -5,8 +5,6 @@ import { MoreHorizontal, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import type { Transaction } from "@/lib/types"
-import { useEffect, useState } from "react"
-import type { Category } from "@/lib/types"
 // Import the new currency display component
 import { IndianCurrencyDisplay } from "@/components/indian-currency-display"
 
@@ -16,21 +14,6 @@ interface RecentTransactionsProps {
 }
 
 export function RecentTransactions({ transactions, onDelete }: RecentTransactionsProps) {
-  const [categories, setCategories] = useState<Category[]>([])
-
-  useEffect(() => {
-    // Load categories from localStorage
-    const categoriesData = localStorage.getItem("tracksyCategories")
-    if (categoriesData) {
-      setCategories(JSON.parse(categoriesData))
-    }
-  }, [])
-
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find((c) => c.id === categoryId)
-    return category ? category.name : "Uncategorized"
-  }
-
   if (transactions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -67,9 +50,7 @@ export function RecentTransactions({ transactions, onDelete }: RecentTransaction
             </div>
             <div>
               <p className="text-sm font-medium">{transaction.description}</p>
-              <p className="text-xs text-gray-500">
-                {getCategoryName(transaction.categoryId)} • {format(new Date(transaction.date), "MMM d, yyyy")}
-              </p>
+              <p className="text-xs text-gray-500">{format(new Date(transaction.date), "MMM d, yyyy")}</p>
             </div>
           </div>
           <div className="flex items-center space-x-2">

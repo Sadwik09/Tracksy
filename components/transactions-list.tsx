@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { format } from "date-fns"
 import { MoreHorizontal, Trash2, Search, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -14,7 +14,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu"
-import type { Transaction, Category } from "@/lib/types"
+import type { Transaction } from "@/lib/types"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 // Import the new currency display component
 import { IndianCurrencyDisplay } from "@/components/indian-currency-display"
@@ -25,20 +25,12 @@ interface TransactionsListProps {
 }
 
 export function TransactionsList({ transactions, onDelete }: TransactionsListProps) {
-  const [categories, setCategories] = useState<Category[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(transactions)
   const [typeFilter, setTypeFilter] = useState<"all" | "income" | "expense">("all")
 
-  useEffect(() => {
-    // Load categories from localStorage
-    const categoriesData = localStorage.getItem("tracksyCategories")
-    if (categoriesData) {
-      setCategories(JSON.parse(categoriesData))
-    }
-  }, [])
-
-  useEffect(() => {
+  // Apply filters whenever dependencies change
+  useState(() => {
     // Apply filters
     let result = [...transactions]
 
@@ -51,20 +43,12 @@ export function TransactionsList({ transactions, onDelete }: TransactionsListPro
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
       result = result.filter(
-        (t) =>
-          t.description.toLowerCase().includes(term) ||
-          getCategoryName(t.categoryId).toLowerCase().includes(term) ||
-          (t.notes && t.notes.toLowerCase().includes(term)),
+        (t) => t.description.toLowerCase().includes(term) || (t.notes && t.notes.toLowerCase().includes(term)),
       )
     }
 
     setFilteredTransactions(result)
-  }, [transactions, searchTerm, typeFilter])
-
-  const getCategoryName = (categoryId: string) => {
-    const category = categories.find((c) => c.id === categoryId)
-    return category ? category.name : "Uncategorized"
-  }
+  })
 
   if (transactions.length === 0) {
     return (
@@ -118,7 +102,6 @@ export function TransactionsList({ transactions, onDelete }: TransactionsListPro
           <TableHeader>
             <TableRow>
               <TableHead>Description</TableHead>
-              <TableHead>Category</TableHead>
               <TableHead>Date</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead className="w-[50px]"></TableHead>
@@ -127,7 +110,7 @@ export function TransactionsList({ transactions, onDelete }: TransactionsListPro
           <TableBody>
             {filteredTransactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={4} className="h-24 text-center">
                   No transactions found.
                 </TableCell>
               </TableRow>
@@ -135,7 +118,6 @@ export function TransactionsList({ transactions, onDelete }: TransactionsListPro
               filteredTransactions.map((transaction) => (
                 <TableRow key={transaction.id}>
                   <TableCell className="font-medium">{transaction.description}</TableCell>
-                  <TableCell>{getCategoryName(transaction.categoryId)}</TableCell>
                   <TableCell>{format(new Date(transaction.date), "MMM d, yyyy")}</TableCell>
                   <TableCell className="text-right">
                     <span

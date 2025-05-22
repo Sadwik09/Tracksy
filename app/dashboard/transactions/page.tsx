@@ -3,22 +3,16 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { DashboardShell } from "@/components/dashboard-shell"
-import { Overview } from "@/components/overview"
-import { RecentTransactions } from "@/components/recent-transactions"
-import { AddTransactionForm } from "@/components/add-transaction-form"
-import { PlusCircle } from "lucide-react"
+import { TransactionsList } from "@/components/transactions-list"
 import type { Transaction, User } from "@/lib/types"
-// Import the new currency display component
 import { IndianCurrencyDisplay } from "@/components/indian-currency-display"
 
-export default function DashboardPage() {
+export default function TransactionsPage() {
   const router = useRouter()
   const [user, setUser] = useState<User | null>(null)
   const [transactions, setTransactions] = useState<Transaction[]>([])
-  const [isAddingTransaction, setIsAddingTransaction] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
@@ -41,13 +35,6 @@ export default function DashboardPage() {
     setIsLoading(false)
   }, [router])
 
-  const handleAddTransaction = (newTransaction: Transaction) => {
-    const updatedTransactions = [newTransaction, ...transactions]
-    setTransactions(updatedTransactions)
-    localStorage.setItem("tracksyTransactions", JSON.stringify(updatedTransactions))
-    setIsAddingTransaction(false)
-  }
-
   const handleDeleteTransaction = (id: string) => {
     const updatedTransactions = transactions.filter((t) => t.id !== id)
     setTransactions(updatedTransactions)
@@ -59,33 +46,22 @@ export default function DashboardPage() {
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <div className="animate-spin h-8 w-8 border-4 border-green-600 border-t-transparent rounded-full mx-auto"></div>
-          <p className="mt-4 text-gray-500">Loading your dashboard...</p>
+          <p className="mt-4 text-gray-500">Loading your transactions...</p>
         </div>
       </div>
     )
   }
 
-  // Calculate financial summary
+  // Calculate summary statistics
   const totalIncome = transactions.filter((t) => t.type === "income").reduce((sum, t) => sum + t.amount, 0)
-
   const totalExpenses = transactions.filter((t) => t.type === "expense").reduce((sum, t) => sum + t.amount, 0)
-
   const balance = totalIncome - totalExpenses
 
   return (
     <DashboardShell>
-      <DashboardHeader heading="Dashboard" text={`Welcome back, ${user?.name || "User"}!`}>
-        <Button onClick={() => setIsAddingTransaction(true)} className="bg-green-600 hover:bg-green-700">
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Transaction
-        </Button>
-      </DashboardHeader>
+      <DashboardHeader heading="Transactions" text="View and manage all your financial transactions" />
 
-      {isAddingTransaction && (
-        <AddTransactionForm onAdd={handleAddTransaction} onCancel={() => setIsAddingTransaction(false)} />
-      )}
-
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-3 mb-6">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Income</CardTitle>
@@ -103,7 +79,6 @@ export default function DashboardPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            {/* Replace the currency displays with the new component */}
             <div className="text-2xl font-bold text-green-600">
               <IndianCurrencyDisplay amount={totalIncome} />
             </div>
@@ -129,7 +104,6 @@ export default function DashboardPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            {/* Replace the currency displays with the new component */}
             <div className="text-2xl font-bold text-red-600">
               <IndianCurrencyDisplay amount={totalExpenses} />
             </div>
@@ -155,7 +129,6 @@ export default function DashboardPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            {/* Replace the currency displays with the new component */}
             <div className={`text-2xl font-bold ${balance >= 0 ? "text-green-600" : "text-red-600"}`}>
               <IndianCurrencyDisplay amount={balance} />
             </div>
@@ -166,25 +139,15 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 mt-6">
-        <Card className="col-span-4">
-          <CardHeader>
-            <CardTitle>Financial Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <Overview transactions={transactions} />
-          </CardContent>
-        </Card>
-        <Card className="col-span-3">
-          <CardHeader>
-            <CardTitle>Recent Transactions</CardTitle>
-            <CardDescription>Your most recent financial activities</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <RecentTransactions transactions={transactions.slice(0, 5)} onDelete={handleDeleteTransaction} />
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>All Transactions</CardTitle>
+          <CardDescription>A complete history of your financial activities</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <TransactionsList transactions={transactions} onDelete={handleDeleteTransaction} />
+        </CardContent>
+      </Card>
     </DashboardShell>
   )
 }

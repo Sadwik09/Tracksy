@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import type { Transaction, Category } from "@/lib/types"
+import type { Transaction } from "@/lib/types"
 
 // Import the Indian currency utilities
 import { formatIndianCurrency } from "@/lib/utils-indian-currency"
@@ -14,17 +14,8 @@ interface OverviewProps {
 }
 
 export function Overview({ transactions }: OverviewProps) {
-  const [categories, setCategories] = useState<Category[]>([])
   const [chartData, setChartData] = useState<any[]>([])
   const [period, setPeriod] = useState<"week" | "month" | "year">("month")
-
-  useEffect(() => {
-    // Load categories from localStorage
-    const categoriesData = localStorage.getItem("tracksyCategories")
-    if (categoriesData) {
-      setCategories(JSON.parse(categoriesData))
-    }
-  }, [])
 
   useEffect(() => {
     if (!transactions.length) {

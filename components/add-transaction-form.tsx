@@ -2,20 +2,19 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-import type { Transaction, Category } from "@/lib/types"
+import type { Transaction } from "@/lib/types"
 
 interface AddTransactionFormProps {
   onAdd: (transaction: Transaction) => void
@@ -28,29 +27,12 @@ export function AddTransactionForm({ onAdd, onCancel, defaultType = "expense" }:
   const [amount, setAmount] = useState("")
   const [description, setDescription] = useState("")
   const [date, setDate] = useState<Date>(new Date())
-  const [categoryId, setCategoryId] = useState("")
-  const [categories, setCategories] = useState<Category[]>([])
   const [notes, setNotes] = useState("")
-
-  useEffect(() => {
-    // Load categories from localStorage
-    const categoriesData = localStorage.getItem("tracksyCategories")
-    if (categoriesData) {
-      const allCategories = JSON.parse(categoriesData)
-      setCategories(allCategories)
-
-      // Set default category based on type
-      const defaultCategory = allCategories.find((c: Category) => c.type === type)
-      if (defaultCategory) {
-        setCategoryId(defaultCategory.id)
-      }
-    }
-  }, [type])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!amount || !description || !categoryId) {
+    if (!amount || !description) {
       return
     }
 
@@ -60,7 +42,6 @@ export function AddTransactionForm({ onAdd, onCancel, defaultType = "expense" }:
       amount: Number.parseFloat(amount),
       description,
       date: date.toISOString(),
-      categoryId,
       notes,
       createdAt: new Date().toISOString(),
     }
@@ -140,24 +121,6 @@ export function AddTransactionForm({ onAdd, onCancel, defaultType = "expense" }:
               onChange={(e) => setDescription(e.target.value)}
               required
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Select value={categoryId} onValueChange={setCategoryId} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {categories
-                  .filter((category) => category.type === type)
-                  .map((category) => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="space-y-2">
