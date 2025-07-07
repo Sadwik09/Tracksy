@@ -14,7 +14,7 @@ Any changes you make to your deployed app will be automatically pushed to this r
 
 Your project is live at:
 
-**[https://vercel.com/231fa04a03-gmailcoms-projects/v0-personal-finance-tracker](https://vercel.com/231fa04a03-gmailcoms-projects/v0-personal-finance-tracker)**
+https://tracksy.vercel.app/
 
 ## Build your app
 
