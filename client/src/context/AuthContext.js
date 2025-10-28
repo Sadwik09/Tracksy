@@ -21,33 +21,30 @@ export const AuthProvider = ({ children }) => {
     // Check if user is logged in
     const storedUser = localStorage.getItem("tracksyUser")
     if (storedUser) {
-      const userData = JSON.parse(storedUser)
-      setUser(userData)
+      setUser(JSON.parse(storedUser))
     }
     setLoading(false)
   }, [])
 
-  const login = async (email, password) => {
+  const login = async (credentials) => {
     try {
-      const response = await authAPI.login({ email, password })
-      const userData = response.data
-      localStorage.setItem("tracksyUser", JSON.stringify(userData))
-      setUser(userData)
-      return { success: true }
+      const data = await authAPI.login(credentials)
+      localStorage.setItem("tracksyUser", JSON.stringify(data))
+      setUser(data)
+      return data
     } catch (error) {
-      return { success: false, error: error.message }
+      throw error
     }
   }
 
-  const register = async (name, email, password) => {
+  const register = async (userData) => {
     try {
-      const response = await authAPI.register({ name, email, password })
-      const userData = response.data
-      localStorage.setItem("tracksyUser", JSON.stringify(userData))
-      setUser(userData)
-      return { success: true }
+      const data = await authAPI.register(userData)
+      localStorage.setItem("tracksyUser", JSON.stringify(data))
+      setUser(data)
+      return data
     } catch (error) {
-      return { success: false, error: error.message }
+      throw error
     }
   }
 
@@ -58,11 +55,10 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
-    loading,
     login,
     register,
     logout,
-    isAuthenticated: !!user,
+    loading,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
